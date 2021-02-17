@@ -10,7 +10,7 @@ class UserSchema extends Schema {
             table.string('email', 254).notNullable().unique()
             table.string('password', 60).notNullable()
             table.string('pista', 60).notNullable()
-            table.string('persona1').notNullable()
+            table.string('persona').notNullable()
             table.string('region').notNullable()
             table.string('ciudad').notNullable()
             table.string('area').notNullable()

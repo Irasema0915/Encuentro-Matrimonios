@@ -5,14 +5,13 @@ const Database = use('Database')
 class UsuarioController {
 
     async registro({ request, response }) {
-        const { email, password, pista, persona1, persona2, region, ciudad, area } = request.only(['email', 'password', 'pista', 'persona1', 'persona2', 'region', 'ciudad', 'area'])
+        const { email, password, pista, persona, region, ciudad, area } = request.only(['email', 'password', 'pista', 'persona', 'region', 'ciudad', 'area'])
 
         await User.create({
             email,
             password,
             pista,
-            persona1,
-            persona2,
+            persona,
             region,
             ciudad,
             area
@@ -22,12 +21,9 @@ class UsuarioController {
     async login({ request, response, auth }) {
 
         const { email, password } = request.only(['email', 'password'])
-        try {
-            const token = await auth.attempt(email, password)
-            return response.status(201).json({ "mensaje": "Bienvenido <br/> Que los juegos del hambre comiencen" }, token)
-        } catch (error) {
-            return response.status(401).json({ "mensaje": "Información incorrecta", error })
-        }
+
+        const token = await auth.attempt(email, password)
+        return response.json(token)
 
     }
     async logout({ response, auth }) {
@@ -41,12 +37,11 @@ class UsuarioController {
     async mostrar({ params, response })
 
     {
-        const user = await User.findOrFail(params.id)
-        const res = {
+        const data = await User.all()
 
-            email: user.email
-        }
-        return response.json(res)
+        return response.status(200).json(data)
+
+
     }
     async consulta({ response }) {
         const email = "angelaruiz.0915@gmail.com"
@@ -76,7 +71,7 @@ class UsuarioController {
                     }],
                     "Subject": "Recuperar contraseña",
                     "TextPart": "My first Mailjet email",
-                    "HTMLPart": "<h2> ¡Bievenido al sistema de Encuentro Matrimonial!</h2><h4> ~ Ya tendras tu contraseña, ten pasciencia... ~ </h4><br /> <strong>Tu contraseña es:  " + "(" + sql[0]['pista'] + ") </strong>",
+                    "HTMLPart": "<h2> ¡Bievenido al sistema de Encuentro Matrimonial!</h2><h4> ~ Ya tendras tu contraseña, ten pasciencia... ~ </h4><br /> <strong>Tu contraseña es:  " + " " + sql[0]['pista'] + " </strong>",
                     "CustomID": "AppGettingStartedTest"
                 }]
             })
@@ -90,6 +85,15 @@ class UsuarioController {
         return response.json({ message: "Se ha enviado tu contraseña" })
     }
 
+    async deleteUser({ response, params }) {
+        const id = params.id
+        const user = await User.findOrFail(id)
+
+        if (user.delete())
+            return response.json({ message: "El usuario ha sido eliminado" })
+        return response.json(null, 422)
+
+    }
 
 }
 

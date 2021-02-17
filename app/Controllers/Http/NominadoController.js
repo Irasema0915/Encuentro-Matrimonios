@@ -1,5 +1,6 @@
 'use strict'
 const Nominados = use('App/Models/Modelos/Nominado');
+const Finalistas = use('App/Models/Finalista');
 const Database = use('Database')
 
 class NominadoController {
@@ -21,17 +22,24 @@ class NominadoController {
 
     // Mostrar los nominados
     async mostrar({ response }) {
-        const data = await Nominados.all()
+        const data = await Database.select('nominados.id as id', 'nominados.nombre as nombres', 'nominados.ciudad_origen as ciudad',
+            'nominados.region as region').from('nominados').where({ tipo: 'Matrimonio' })
 
         return response.status(200).json(data)
 
     }
+    async mostrarPadre({ response }) {
+            const data = await Database.select('nominados.id as id', 'nominados.nombre as nombres', 'nominados.ciudad_origen as ciudad',
+                'nominados.region as region').from('nominados').where({ tipo: 'Sacerdote' })
 
-    //Muestra la suma de los votos que son de tipo "MATRIMONIO"
+            return response.status(200).json(data)
+
+        }
+        //Muestra la suma de los votos que son de tipo "MATRIMONIO"
     async totalVotosMatrimonios({ response, }) {
         //const { id, nombre, tipo, votos } = request.all()
 
-        const sql = await Database.from('nominados').sum('nominados.votos as Total de votos')
+        const sql = await Database.from('finalistas').sum('finalistas.votos as Votos')
             .where({ tipo: 'Matrimonio' })
 
         return response.json(sql)
@@ -41,15 +49,15 @@ class NominadoController {
     async totalVotosSacerdotes({ response, }) {
         //const { id, nombre, tipo, votos } = request.all()
 
-        const sql = await Database.from('nominados').sum('nominados.votos as Total de votos')
-            .where({ tipo: 'Padrecito' })
+        const sql = await Database.from('finalistas').sum('finalistas.votos as Votos')
+            .where({ tipo: 'Sacerdote' })
 
         return response.json(sql)
     }
 
 
     //Saca los finalistas de que tienen mas votos 
-    async finalistasMatrimonio({ response }) {
+    async insertarfinalistasMatrimonio({ response }) {
         const max = await Database.table('nominados').where({ tipo: 'Matrimonio' })
             .having('votos', '>=', '3')
         let i = 0
@@ -206,6 +214,32 @@ class NominadoController {
         } else {
             return response.json({ mensaje: 'Votos insuficientes, favor de realizar la otra vez' })
         }
+    }
+
+
+    // FINALISTAS //
+
+    async mostrarFinalistasM({ response }) {
+        const data = await Database.select('finalistas.id as id', 'finalistas.nombre as nombres', 'finalistas.ciudad_origen as ciudad',
+            'finalistas.region as region').from('finalistas').where({ tipo: 'Matrimonio' })
+
+        return response.status(200).json(data)
+
+    }
+    async mostrarFinalistasP({ response }) {
+        const data = await Database.select('finalistas.id as id', 'finalistas.nombre as nombres', 'finalistas.ciudad_origen as ciudad',
+            'finalistas.region as region').from('finalistas').where({ tipo: 'Sacerdote' })
+
+        return response.status(200).json(data)
+
+    }
+
+    async sumaVotosF({ params, response }) {
+        const fin = await Finalistas.findOrFail(params.id)
+
+        const Total = await Database.table('finalistas').where('id', fin['id']).increment('votos', 1)
+
+        return response.json({ mensaje: 'Ha  sido exitoso tu voto' })
     }
 
 

@@ -8,7 +8,7 @@ class FinalistasSchema extends Schema {
         this.create('finalistas', (table) => {
             table.increments('id')
             table.integer('ronda')
-            table.string('nombre')
+            table.string('nombre').unique()
             table.string('ciudad_origen').notNullable()
             table.string('region').notNullable()
             table.string('tipo').notNullable()
